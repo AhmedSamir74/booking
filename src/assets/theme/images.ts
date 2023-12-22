@@ -1,0 +1,12 @@
+export default {
+  icons: {
+    splashIcon: require('../icons/splashIcon.png'),
+    loginLogo: require('../icons/loginLogo.png'),
+  },
+  tabs: {},
+  images: {
+    offline: require('../images/offline.png'),
+    student: require('../images/student.png'),
+    onBoarding: require('../images/onBoarding.png'),
+  },
+};

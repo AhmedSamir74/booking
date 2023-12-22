@@ -1,0 +1,4 @@
+export enum AUTHENTICATION_TABS {
+  LOGIN,
+  SIGNUP,
+}
