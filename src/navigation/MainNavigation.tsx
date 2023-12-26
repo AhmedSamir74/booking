@@ -1,10 +1,13 @@
 import React from 'react';
 import {
   SplashScreen,
-  StudentDetailsScreen,
+  HotelsDetailsScreen,
   OnBoarding,
   HomeScreen,
   AuthenticationScreen,
+  ProfileScreen,
+  SettingsScreen,
+  BookingsScreen,
 } from '../screens';
 import { createStackNavigator } from '@react-navigation/stack';
 import { strings } from '../localization';
@@ -49,13 +52,12 @@ const MainNavigation = () => {
       />
       <StackNavigator.Screen name="Login" component={AuthenticationScreen} />
       <StackNavigator.Screen
-        name="StudentDetails"
-        component={StudentDetailsScreen}
-        options={{
-          headerBackTitle: '',
-          title: strings('studentDetails'),
-        }}
+        name="HotelDetails"
+        component={HotelsDetailsScreen}
       />
+      <StackNavigator.Screen name="Profile" component={ProfileScreen} />
+      <StackNavigator.Screen name="Settings" component={SettingsScreen} />
+      <StackNavigator.Screen name="Bookings" component={BookingsScreen} />
     </StackNavigator.Navigator>
   );
 };

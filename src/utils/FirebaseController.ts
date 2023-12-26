@@ -1,8 +1,10 @@
 import firestore from '@react-native-firebase/firestore';
 import Config from 'react-native-config';
-import { IStudent } from 'types';
+import { IBookingProps } from 'types';
 
-const STUDENTS_COLLECTION_NAME = Config.STUDENTS_COLLECTION_NAME || '';
+const recommendedHotelsCollection =
+  Config.RECOMMENDED_HOTELS_COLLECTION_NAME as string;
+const reservationsCollection = Config.RESERVATION_COLLECTION_NAME as string;
 
 class FirebaseController {
   constructor() {
@@ -24,11 +26,15 @@ class FirebaseController {
     return firestore().collection(collection).doc(documentID).get();
   }
 
-  filterDocuments(
-    collection: string,
-    filterAttribute: string,
-    filterValue: any,
-  ) {
+  filterDocuments({
+    collection,
+    filterAttribute,
+    filterValue,
+  }: {
+    collection: string;
+    filterAttribute: string;
+    filterValue: any;
+  }) {
     return firestore()
       .collection(collection)
       .orderBy(filterAttribute)
@@ -91,36 +97,26 @@ class FirebaseController {
       );
   }
 
-  /** STUDENTS **/
-  addStudent(student: IStudent) {
-    return this.addDocument(STUDENTS_COLLECTION_NAME, student);
+  getHotels() {
+    return this.getCollectionData({
+      collectionName: recommendedHotelsCollection,
+      orderBy: {
+        name: 'name',
+        value: 'asc',
+      },
+    });
   }
 
-  updateStudent(studentId: string, student: IStudent) {
-    return this.updateDocument(STUDENTS_COLLECTION_NAME, studentId, student);
+  createReservation(reservation: IBookingProps) {
+    return this.addDocument(reservationsCollection, reservation);
   }
 
-  getStudents(studentName?: string, startAfter?: unknown) {
-    if (studentName) {
-      return this.getStudentsByName(studentName);
-    } else {
-      return this.getCollectionData({
-        collectionName: STUDENTS_COLLECTION_NAME,
-        orderBy: {
-          name: 'firstName',
-          value: 'asc',
-        },
-        startAfter,
-      });
-    }
-  }
-
-  getStudentsByName(name: string) {
-    return this.filterDocuments(STUDENTS_COLLECTION_NAME, 'firstName', name);
-  }
-
-  getStudentData(studentId: string) {
-    return this.getDocument(STUDENTS_COLLECTION_NAME, studentId);
+  getUserBookings(userId: string) {
+    return this.filterDocuments({
+      collection: reservationsCollection,
+      filterAttribute: 'userId',
+      filterValue: userId,
+    });
   }
 }
 

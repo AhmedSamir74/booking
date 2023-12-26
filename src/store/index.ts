@@ -1,12 +1,25 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import themReducer from './slices/themSlice';
+import userSlice from './slices/userSlice';
+import themeSlice from './slices/themSlice';
 
 export const store = configureStore({
   reducer: {
-    theme: themReducer,
+    userData: userSlice,
+    theme: themeSlice,
   },
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types
+        ignoredActions: ['userData/setUser'],
+        // Ignore these field paths in all actions
+        ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
+        // Ignore these paths in the state
+        ignoredPaths: ['items.dates'],
+      },
+    }),
 });
 setupListeners(store.dispatch);
 

@@ -2,13 +2,6 @@ export const IS_NEW_USER_KEY = 'isNewUser';
 export const LANG_KEY = 'lang';
 export const THEME_KEY = 'theme';
 
-export const ADMID_STORE_DATA = {
-  id: '1',
-  name: 'Elhalawany',
-  image:
-    'https://uxwing.com/wp-content/themes/uxwing/download/editing-user-action/admin-icon.png',
-};
-
 export const THEMES_OPTIONS = [
   {
     id: 1,

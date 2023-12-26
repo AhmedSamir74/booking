@@ -1,100 +1,69 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList } from 'react-native';
+import { FlatList, Image, TouchableOpacity, View } from 'react-native';
 
 import {
   CustomLayout,
+  CustomText,
   EmptyList,
   ErrorCard,
   Skelton,
 } from '@components/common';
-import { COLORS } from '@assets/theme/theme';
 
 import FirebaseController from '@utils/FirebaseController';
 
 import styles from './styles';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import { IGetDocuemtnsParams } from 'types';
+import images from '@assets/theme/images';
+import { strings } from 'localization';
+import { CATEGORIES } from './categories.constants';
+import { CategoryCard, HotelCard } from './Components';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from 'types/RootStackPrams';
+import { useNavigation } from '@react-navigation/native';
 
+// FOR GETTING HOTELS USING GOOGLE PLACE API BUT IT COULDN'T BE USED BECAUSE IT'S NOT FREE
+// import { useGetNearbyHotels } from '@hooks/useGetNearbyHotels';
+
+type HomeScreenProp = StackNavigationProp<RootStackParamList, 'Home'>;
 export const HomeScreen = () => {
+  const { navigate } = useNavigation<HomeScreenProp>();
+
+  // const { hotels: hotelsData, isLoading: isHotelsLoading } =
+  //   useGetNearbyHotels();
+
   const firebaseController = useRef(new FirebaseController()).current;
+  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].id);
 
-  const [students, setStudents] = useState<
-    FirebaseFirestoreTypes.DocumentData[]
-  >([]);
+  const [hotels, setHotels] = useState<FirebaseFirestoreTypes.DocumentData[]>(
+    [],
+  );
 
-  const [lastDocument, setLastDocument] =
-    useState<FirebaseFirestoreTypes.DocumentData>();
-
-  const [booleans, setBooleans] = useState({
-    isLoading: true,
-    isRefreshing: false,
-    isListEnded: false,
-  });
+  const [isLoading, setIsLoading] = useState(true);
 
   const [loadingError, setLoadingError] = useState('');
 
-  const onBooleanChange = (key: keyof typeof booleans, value: boolean) =>
-    setBooleans(prevState => ({
-      ...prevState,
-      [key]: value,
-    }));
-
-  const getStudents = async (params?: IGetDocuemtnsParams) => {
-    if (params?.isPaginating && booleans.isListEnded) {
-      return;
-    }
-
-    const lastDoc = params?.isPaginating ? lastDocument : undefined;
-    const query = params?.isSearching ? params?.studentName : undefined;
+  const getHotels = async () => {
     firebaseController
-      .getStudents(query, lastDoc)
-      .then(async querySnapshot => {
-        // In filtration
-        if (!params || params?.isSearching || params?.isRefreshing) {
-          setStudents(querySnapshot.docs);
-        } else if (params?.isPaginating) {
-          // if paginating append the new students to the current students list
-          setStudents(prevState => [...prevState, ...querySnapshot.docs]);
-        }
-        setLastDocument(querySnapshot.docs[querySnapshot.docs.length - 1]);
-        // for hiding the spinner under the list
-        onBooleanChange('isListEnded', !querySnapshot.docs.length);
+      .getHotels()
+      .then(async querySnapshot => querySnapshot.docs)
+      .then(async docs => {
+        setHotels(docs);
       })
       .catch((error: any) => {
         setLoadingError("Can't Load data, Please try again");
         return error;
       })
       .finally(() => {
-        onBooleanChange('isLoading', false);
+        setIsLoading(false);
       });
   };
 
   const getListEmptyComponent = () => {
-    return booleans.isLoading ? <Skelton /> : <EmptyList />;
+    return isLoading ? <Skelton /> : <EmptyList />;
   };
-
-  const onRefresh = () => {
-    onBooleanChange('isRefreshing', true);
-
-    // the set timeout is for better user experience in refreshing
-    setTimeout(() => {
-      getStudents().then(() => {
-        onBooleanChange('isRefreshing', false);
-      });
-    }, 1500);
-  };
-
-  const renderListFooterComp = () =>
-    !booleans.isListEnded ? (
-      <ActivityIndicator
-        size="small"
-        color={COLORS.primary}
-        style={styles.footerLoader}
-      />
-    ) : null;
 
   useEffect(() => {
-    getStudents();
+    getHotels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -104,16 +73,37 @@ export const HomeScreen = () => {
 
   return (
     <CustomLayout style={styles.layout}>
-      <FlatList
-        refreshing={booleans.isRefreshing}
-        onRefresh={onRefresh}
-        data={[]}
-        renderItem={() => <></>}
-        ListEmptyComponent={getListEmptyComponent}
-        ListFooterComponent={renderListFooterComp}
-        onEndReachedThreshold={0.3}
-        onEndReached={() => getStudents({ isPaginating: true })}
-      />
+      <TouchableOpacity activeOpacity={0.8} onPress={() => navigate('Profile')}>
+        <Image
+          source={images.icons.award}
+          style={styles.headerIcon}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+      <View style={styles.categoriesAndHotelsCont}>
+        <View>
+          <CustomText size={28} weight="semiBold" style={styles.greeting}>
+            {strings('homePage.greeting')}
+          </CustomText>
+          <FlatList
+            data={CATEGORIES}
+            renderItem={({ item }) => (
+              <CategoryCard
+                onPress={() => setActiveCategory(item.id)}
+                category={item}
+                isActive={item.id === activeCategory}
+              />
+            )}
+            horizontal
+          />
+        </View>
+        <FlatList
+          data={hotels}
+          renderItem={({ item }) => <HotelCard hotel={item.data()} />}
+          ListEmptyComponent={getListEmptyComponent}
+          horizontal
+        />
+      </View>
     </CustomLayout>
   );
 };

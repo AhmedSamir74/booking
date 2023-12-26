@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Animated, Easing, View } from 'react-native';
 import images from '@assets/theme/images';
@@ -8,9 +9,13 @@ import { IS_NEW_USER_KEY } from '@utils/constants';
 import { RootStackParamList } from 'types/RootStackPrams';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import auth from '@react-native-firebase/auth';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@store/slices/userSlice';
 
 type SplashScreenProp = StackNavigationProp<RootStackParamList, 'Loading'>;
 export const SplashScreen: FC = () => {
+  const dispatch = useDispatch();
   const fadeInValue = useMemo(() => new Animated.Value(0), []);
   const navigation = useNavigation<SplashScreenProp>();
   const isNewUser = useCallback(async () => {
@@ -23,19 +28,6 @@ export const SplashScreen: FC = () => {
     return isNew;
   }, []);
 
-  const navigateUser = useCallback(async () => {
-    console.log('Login');
-
-    navigation.replace('Login');
-
-    // const returnedNewUser = await isNewUser();
-    // if (returnedNewUser) {
-    //   navigation.replace('OnBoarding');
-    // } else {
-    //   navigation.replace('Home');
-    // }
-  }, []);
-
   useEffect(() => {
     // ANIMATING Logo
     Animated.sequence([
@@ -45,8 +37,32 @@ export const SplashScreen: FC = () => {
         easing: Easing.linear,
         useNativeDriver: true,
       }),
-    ]).start(navigateUser);
-  }, [fadeInValue, navigateUser]);
+    ]).start();
+  }, [fadeInValue]);
+
+  // Handle user state changes
+  const onAuthStateChanged = async (user: any) => {
+    const returnedNewUser = await isNewUser();
+    setTimeout(() => {
+      if (returnedNewUser) {
+        navigation.replace('OnBoarding');
+      } else {
+        if (user) {
+          dispatch(setUser(user));
+          navigation.replace('Home');
+          // Signed in
+        } else {
+          // Signed out
+          navigation.replace('Login');
+        }
+      }
+    }, 1000);
+  };
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
 
   return (
     <View style={styles.container}>

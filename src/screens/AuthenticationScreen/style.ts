@@ -27,9 +27,6 @@ export default StyleSheet.create({
     borderBottomWidth: 3,
     borderBottomColor: COLORS.primary,
   },
-  button: {
-    marginTop: 20,
-  },
   tabText: {
     fontSize: scaleFontSize(20),
     color: COLORS.gray,
