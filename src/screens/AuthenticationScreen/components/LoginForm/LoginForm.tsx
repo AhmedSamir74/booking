@@ -84,7 +84,7 @@ export const LoginForm = () => {
       .catch(error => {
         Toast.show({
           type: 'error',
-          text1: error,
+          text1: 'Username or password is wrong',
         });
         console.error(error);
       });

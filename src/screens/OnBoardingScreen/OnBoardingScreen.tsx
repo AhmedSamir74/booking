@@ -20,7 +20,7 @@ export const OnBoarding = () => {
   }, []);
 
   const onNextPress = () => {
-    navigation.navigate('Home');
+    navigation.navigate('Login');
   };
   return (
     <CustomLayout style={styles.screen}>
