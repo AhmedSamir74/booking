@@ -8,7 +8,7 @@ import {
   TextStyle,
   TouchableOpacity,
 } from 'react-native';
-import theme from '@assets/theme/theme';
+import { COLORS, FONT_FAMILIES } from '@assets/theme/theme';
 import { scaleHeight, scaleWidth } from '@utils/scaling';
 import { CustomText } from '@components/common';
 
@@ -57,7 +57,7 @@ export const CustomButton = ({
       {loading && (
         <ActivityIndicator
           size={14}
-          color={theme.colors.white}
+          color={COLORS.white}
           style={styles.loader}
         />
       )}
@@ -69,7 +69,7 @@ export const CustomButton = ({
           underLine && styles.underLineText,
           textStyle,
         ]}
-        size={titleSize ? titleSize : 15}>
+        size={titleSize || 15}>
         {title} {children}
       </CustomText>
     </TouchableOpacity>
@@ -88,18 +88,18 @@ const styles = StyleSheet.create({
     paddingVertical: scaleHeight(8),
   },
   primaryCont: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: COLORS.primary,
     height: scaleHeight(50),
   },
   disabled: {
-    backgroundColor: theme.colors.gray,
+    backgroundColor: COLORS.gray,
   },
   text: {
-    color: theme.colors.white,
-    fontFamily: theme.fontFamily.semiBold,
+    color: COLORS.white,
+    fontFamily: FONT_FAMILIES.semiBold,
   },
   linkText: {
-    color: theme.colors.primary,
+    color: COLORS.primary,
   },
   underLineText: {
     textDecorationLine: 'underline',
